@@ -7,17 +7,17 @@
  
  Institutions   : School of Biological Sciences
                   University of Sydney
-						Sydney, NSW 2006, Australia
+                  Sydney, NSW 2006, Australia
  
-					 : CSIRO Land & Water
+                : CSIRO Land & Water
                   GPO Box 1700
                   Canberra, ACT 2601, Australia
  
  Date begun     : 18 April, 2001
  
- Date modified  : 1 September, 2016
+ Date modified  : 1 December, 2017
  
- Copyright      : Copyright 2016, CSIRO & The University of Sydney.
+ Copyright      : Copyright 2017, CSIRO & The University of Sydney.
  
  Responsibility : The copyright holders take no legal responsibility for the correctness
                   of results obtained using this program.
@@ -55,8 +55,8 @@
                 : Aitchison J (1986). The statistical analysis of compositional data.
                   Chapman and Hall.
  
-                : Jermiin LS, Lovell DR, von Haeseler A (2017). Homo 1.3: a program for
-						surveying and visualizing compositional heterogeneity across aligned
+                : Jermiin LS, Lovell DR, von Haeseler A (2018). Homo 1.3: a program for
+                  surveying and visualizing compositional heterogeneity across aligned
                   sequence data. Syst. Biol. (in prep.)
  
  ---------------------------------------------------------------------------------------*/
@@ -258,8 +258,8 @@ void Information()
 	printf("\nProgram   : Homo - Version 1.3");
 	printf("\n");
 	printf("\nPurpose   : Homo is designed to allow users to analyse compositional");
-	printf("\n            heterogeneity across aligned sequence data.\n");
-	printf("\nCopyright : 2016, CSIRO and the University of Sydney.\n");
+	printf("\n            heterogeneity across aligned molecular sequence data.\n");
+	printf("\nCopyright : 2017, CSIRO and the University of Sydney.\n");
 	printf("\nPermission is granted to use and distribute this program, provided the");
 	printf("\nthe licence to use the program is not violated.  The copyright holders");
 	printf("\ntake no legal responsibility for correctness of results obtained using");
@@ -268,11 +268,12 @@ void Information()
 	printf("\nFor further information, consult the manual and/or contact the author.");
 	printf("\n");
 	printf("\nAuthor    : Lars S. Jermiin");
-	printf("\nAddress   : CSIRO Land & Water");
-	printf("\n            Canberra, ACT 2601");
+	printf("\nAddress   : Research School of Biology");
+    printf("\n            Australian National University");
+	printf("\n            Canberra, ACT 2600");
 	printf("\n            Australia.");
-	printf("\nPhone     : +61 (02) 6246 4043");
-	printf("\nE-mail    : lars.jermiin@csiro.au");
+	printf("\nPhone     : +61 (02) 6125 4720");
+	printf("\nE-mail    : lars.jermiin@anu.edu.au");
 	printf("\n\nType RETURN to continue...");
 	getchar();
 }
@@ -1745,7 +1746,7 @@ void Heterogeneity(int num_of_seq, int character_type, int coding_type)
 			}
 			
 /*
- First, we set the size of sizeYZ (D in the manual), which is
+ First, we set the size of sizeYZ (vectors Y and Z in the manual), which is
  the upper limit of the indices used in vectorY and vectorZ
  */
 			
@@ -1769,7 +1770,7 @@ void Heterogeneity(int num_of_seq, int character_type, int coding_type)
 			}
 
 /*
- Next, we set the size of sizeUV (D in the manual), which is
+ Next, we set the size of sizeUV (vectors U and V in the manual), which is
  the upper limit of the indices used in vectorU and vectorV
  */
 			
@@ -1810,29 +1811,27 @@ void Heterogeneity(int num_of_seq, int character_type, int coding_type)
  From the divergence matrix, compute two vectors with matching counts
  in the l-th cells (as in the manual).
  
- The numbers of times an element with zero occur in vectorY and vectorZ is also
+ The numbers of times zero occurs in vectorY and vectorZ is also
  computed.
  */
 			for (l = 0; l < sizeYZ; l++) {
-				vectorZ[l] = 0.0;
 				vectorY[l] = 0.0;
+                vectorZ[l] = 0.0;
 			}
 			l = 0;
-			zeroY = 0;
-			zeroZ = 0;
-			for (m = 1; m < sizeUV; m++) {
-				for (n = 0; n < m; n++) {
-					if (dm[n][m] == 0) {
-						++zeroY;
-					}
-					vectorY[l] = dm[n][m];
-					if (dm[m][n] == 0) {
-						++zeroZ;
-					}
-					vectorZ[l] = dm[m][n];
+			for (m = 0; m < sizeUV; m++) {
+				for (n = m+1; n < sizeUV; n++) {
+                    vectorY[l] = dm[m][n];
+                    vectorZ[l] = dm[n][m];
 					l++;
 				}
 			}
+            zeroY = 0;
+            zeroZ = 0;
+            for (l = 0; l < sizeYZ; l++) {
+                if (vectorY[l] < 1) ++zeroY;
+                if (vectorZ[l] < 1) ++zeroZ;
+            }
 
 /*
  If data contains two sequences only, print vectorY and vectorZ to terminal
@@ -1850,31 +1849,28 @@ void Heterogeneity(int num_of_seq, int character_type, int coding_type)
 /*
  From the marginal values of the divergence matrix, compute two vectors
  with matching counts in the l-th cells (as in the manual)
- 
- */
+*/
 			
-			for (m = 0; m < 20; m++) {
+			for (m = 0; m < sizeUV; m++) {
 				vectorU[m] = 0.0;
 				vectorV[m] = 0.0;
 			}
-			zeroU = 0;
-			zeroV = 0;
-			for (m = 0; m < 20; m++) {
+			for (m = 0; m < sizeUV; m++) {
 				varU = 0;
 				varV = 0;
-				for (n = 0; n < 20; n++) {
+				for (n = 0; n < sizeUV; n++) {
 					varU = varU + dm[m][n];
 					varV = varV + dm[n][m];
 				}
-				if (varU == 0) {
-					++zeroU;
-				}
 				vectorU[m] = varU;
-				if (varV == 0) {
-					++varV;
-				}
 				vectorV[m] = varV;
 			}
+            zeroU = 0;
+            zeroV = 0;
+            for (m = 0; m < sizeUV; m++) {
+                if (vectorU[m] < 1) ++zeroU;
+                if (vectorV[m] < 1) ++zeroV;
+            }
 
 /*
  If data contains two sequences only, print vectorU and vectorV to terminal
@@ -1983,19 +1979,23 @@ void Heterogeneity(int num_of_seq, int character_type, int coding_type)
 						count = (int) vectorZ[l];
 						if (count == 0) {
 							vectorZ[l] = zeroAdj * sum;
+//							printf("\nzeroZ = %d; sizeYZ = %d; count = %d; sum = %d; zeroAdj = %f; vectorZ[l] = %f; l = %d",zeroZ,sizeYZ,count,sum,zeroAdj,vectorZ[l],l);
 						} else {
 							vectorZ[l] = (1.0 - zeroAdj * zeroZ) * count;
+//							printf("\nzeroZ = %d; sizeYZ = %d; count = %d; sum = %d; zeroAdj = %f; vectorZ[l] = %f; l = %d",zeroZ,sizeYZ,count,sum,zeroAdj,vectorZ[l],l);
 						}
 					}
 				}
 				d_Aitc_Full = 0.0;
-				for (m = 0; m < sizeYZ; m++) {
-					for (n = 0; n < sizeYZ; n++) {
-						d_Aitc_Full = d_Aitc_Full + SQR(log(vectorY[m]/vectorY[n]) - log(vectorZ[m]/vectorZ[n]));
-					}
-				}
-				d_Aitc_Full = sqrt(d_Aitc_Full/(2 * sizeYZ));
-
+                if (zeroY < sizeYZ && zeroZ < sizeYZ) {
+                    for (m = 0; m < sizeYZ; m++) {
+                        for (n = 0; n < sizeYZ; n++) {
+                            d_Aitc_Full = d_Aitc_Full + SQR(log(vectorY[m]/vectorY[n]) - log(vectorZ[m]/vectorZ[n]));
+                        }
+                    }
+                    d_Aitc_Full = sqrt(d_Aitc_Full/(2 * sizeYZ));
+                }
+//                printf("\nzeroY = %d; zeroZ = %d; d_Aitc_Full = %10.6f\n",zeroY,zeroZ,d_Aitc_Full);
 
 /*
  If data contains two sequences only, print vectorY and vectorZ to terminal
@@ -2029,8 +2029,10 @@ void Heterogeneity(int num_of_seq, int character_type, int coding_type)
 						count = (int) vectorU[l];
 						if (count == 0) {
 							vectorU[l] = zeroAdj * sum;
+//                            printf("\nzeroU = %d; sizeUV = %d; count = %d; sum = %d; zeroAdj = %f; vectorU[l] = %f; l = %d",zeroU,sizeUV,count,sum,zeroAdj,vectorU[l],l);
 						} else {
 							vectorY[l] = (1.0 - zeroAdj * zeroU) * count;
+//                            printf("\nzeroU = %d; sizeUV = %d; count = %d; sum = %d; zeroAdj = %f; vectorU[l] = %f; l = %d",zeroU,sizeUV,count,sum,zeroAdj,vectorU[l],l);
 						}
 					}
 				}
@@ -2044,19 +2046,36 @@ void Heterogeneity(int num_of_seq, int character_type, int coding_type)
 						count = (int) vectorV[l];
 						if (count == 0) {
 							vectorV[l] = zeroAdj * sum;
+//                            printf("\nzeroV = %d; sizeUV = %d; count = %d; sum = %d; zeroAdj = %f; vectorV[l] = %f; l = %d",zeroV,sizeUV,count,sum,zeroAdj,vectorV[l],l);
 						} else {
 							vectorV[l] = (1.0 - zeroAdj * zeroV) * count;
+//                            printf("\nzeroV = %d; sizeUV = %d; count = %d; sum = %d; zeroAdj = %f; vectorV[l] = %f; l = %d",zeroV,sizeUV,count,sum,zeroAdj,vectorV[l],l);
 						}
 					}
 				}
 				d_Aitc_Marg = 0.0;
-				for (m = 0; m < sizeUV; m++) {
-					for (n = 0; n < sizeUV; n++) {
-						d_Aitc_Marg = d_Aitc_Marg + SQR(log(vectorU[m]/vectorU[n]) - log(vectorV[m]/vectorV[n]));
-					}
-				}
-				d_Aitc_Marg = sqrt(d_Aitc_Marg/(2 * sizeUV));
+                if (zeroU < sizeUV && zeroV < sizeUV) {
+                    for (m = 0; m < sizeUV; m++) {
+                        for (n = 0; n < sizeUV; n++) {
+                            d_Aitc_Marg = d_Aitc_Marg + SQR(log(vectorU[m]/vectorU[n]) - log(vectorV[m]/vectorV[n]));
+                        }
+                    }
+                    d_Aitc_Marg = sqrt(d_Aitc_Marg/(2 * sizeUV));
+                }
+//                printf("\nzeroU = %d; zeroV = %d; d_Aitc_Marg = %10.6f\n",zeroU,zeroV,d_Aitc_Marg);
 
+                
+/*
+ If data contains two sequences only, print vectorY and vectorZ to terminal
+ for debugging and other purposes
+ */
+                
+                if(num_of_seq == 2 && i < j){
+                    printf("\nvectorU & vectorV:\n");
+                    for (l = 0; l < sizeUV; l++) {
+                        printf("l = %3d; vectorU = %10.6f; vectorV = %10.6f\n",l,vectorU[l],vectorV[l]);
+                    }
+                }
 
 			} else {
 
