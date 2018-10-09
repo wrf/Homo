@@ -1,6 +1,6 @@
-# Homo v.13 #
+# Homo v1.3 #
 
-Details about how to compile, install and use Homo Version 1.3 are available in the manual.
+This is a fork of the program [Homo](https://github.com/lsjermiin/Homo). Details about how to compile, install and use Homo Version 1.3 are available in the manual.
 Please direct errors, concerns and questions about the program to lars.jermiin@anu.edu.au
 
 ## generating plots of results ##
